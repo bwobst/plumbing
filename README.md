@@ -6,20 +6,21 @@ A webstack-from-scratch project that implements miniature versions of common web
 
 This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*` is a TypeScript project. Scripts run via [tsx](https://github.com/privatenumber/tsx) (no compile step).
 
-| Package | Path | Description |
-|---------|------|-------------|
-| `@dns` | `packages/dns/` | DNS wire format, capture scripts, resolver |
+| Package | Path            | Description                                |
+| ------- | --------------- | ------------------------------------------ |
+| `@dns`  | `packages/dns/` | DNS wire format, capture scripts, resolver |
 
 ### Commands
 
-```bash
+````bash
 pnpm install          # install all workspace dependencies
 pnpm typecheck        # typecheck every package
 
-# @dns scripts (also runnable from packages/dns/ with pnpm <script>)
-pnpm dns:parse-response
-pnpm dns:capture-response
-```
+# @dns scripts
+
+```bash
+tsx packages/dns/src/wire-format-parser/index.ts
+````
 
 Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.
 

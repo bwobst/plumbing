@@ -4,17 +4,14 @@ DNS learning utilities — wire-format parsing, capture scripts, and (eventually
 
 ## Scripts
 
-From the repo root:
+### One-time script execution
 
 ```bash
-pnpm dns:parse-response    # load fixtures/response.bin and print hex
-pnpm dns:capture-response  # send a UDP query and save response.bin
+tsx packages/dns/src/wire-format-parser/index.ts
 ```
 
-From this package:
+### Automatically re-run script on change
 
 ```bash
-pnpm parse-response
-pnpm capture-response
-pnpm capture-response 1.1.1.1 53   # optional resolver host and port
+tsx watch packages/dns/src/wire-format-parser/index.ts
 ```
