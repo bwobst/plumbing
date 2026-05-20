@@ -12,15 +12,16 @@ This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*
 
 ### Commands
 
-````bash
+```bash
 pnpm install          # install all workspace dependencies
 pnpm typecheck        # typecheck every package
+```
 
 # @dns scripts
 
 ```bash
 tsx packages/dns/src/wire-format-parser/index.ts
-````
+```
 
 Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.
 
