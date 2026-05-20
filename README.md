@@ -1,3 +1,30 @@
 # Plumbing
 
-A webstack-from-scatch project that implements miniature versions of common web technologies to explore how they actually work.
+A webstack-from-scratch project that implements miniature versions of common web technologies to explore how they actually work.
+
+## Monorepo
+
+This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*` is a TypeScript project. Scripts run via [tsx](https://github.com/privatenumber/tsx) (no compile step).
+
+| Package | Path | Description |
+|---------|------|-------------|
+| `@dns` | `packages/dns/` | DNS wire format, capture scripts, resolver |
+
+### Commands
+
+```bash
+pnpm install          # install all workspace dependencies
+pnpm typecheck        # typecheck every package
+
+# @dns scripts (also runnable from packages/dns/ with pnpm <script>)
+pnpm dns:parse-response
+pnpm dns:capture-response
+```
+
+Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.
+
+### Adding a package
+
+1. Create `packages/<name>/` with `package.json`, `tsconfig.json`, and `src/`.
+2. Set `"name": "@<scope>/<name>"` (or your chosen scope).
+3. Add scripts with `tsx src/scripts/<name>.ts`.
