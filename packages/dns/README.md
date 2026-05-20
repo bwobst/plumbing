@@ -7,11 +7,11 @@ DNS learning utilities — wire-format parsing, capture scripts, and (eventually
 ### One-time script execution
 
 ```bash
-tsx packages/dns/src/wire-format-parser/index.ts
+pnpm exec tsx packages/dns/src/wire-format-parser/index.ts
 ```
 
 ### Automatically re-run script on change
 
 ```bash
-tsx watch packages/dns/src/wire-format-parser/index.ts
+pnpm exec tsx watch packages/dns/src/wire-format-parser/index.ts
 ```

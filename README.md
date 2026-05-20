@@ -4,7 +4,7 @@ A webstack-from-scratch project that implements miniature versions of common web
 
 ## Monorepo
 
-This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*` is a TypeScript project. Scripts run via [tsx](https://github.com/privatenumber/tsx) (no compile step).
+This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*` is a TypeScript 6 project (`target` ES2025). Scripts run via [tsx](https://github.com/privatenumber/tsx) (no compile step).
 
 | Package | Path            | Description                                |
 | ------- | --------------- | ------------------------------------------ |
@@ -20,7 +20,7 @@ pnpm typecheck        # typecheck every package
 ### @dns scripts
 
 ```bash
-tsx packages/dns/src/wire-format-parser/index.ts
+pnpm exec tsx packages/dns/src/wire-format-parser/index.ts
 ```
 
 Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.
