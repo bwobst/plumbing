@@ -17,7 +17,7 @@ pnpm install          # install all workspace dependencies
 pnpm typecheck        # typecheck every package
 ```
 
-# @dns scripts
+### @dns scripts
 
 ```bash
 tsx packages/dns/src/wire-format-parser/index.ts
