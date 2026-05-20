@@ -14,7 +14,10 @@ This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*
 
 ```bash
 pnpm install          # install all workspace dependencies
+pnpm lint             # lint and format check (Biome)
+pnpm lint:fix         # apply safe lint and format fixes
 pnpm typecheck        # typecheck every package
+pnpm check            # lint + typecheck
 ```
 
 ### @dns scripts
