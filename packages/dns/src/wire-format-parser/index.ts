@@ -13,19 +13,6 @@ const readDnsResponseFile = async (path: string) => {
   return fs.readFile(path)
 }
 
-const dnsResponseToBufferSections = (buff: Buffer) => {
-  const fullBuffer = Buffer.from(buff)
-
-  return {
-    full: fullBuffer,
-    header: fullBuffer.subarray(0, 4),
-    questions: fullBuffer.subarray(4, 6),
-    answers: fullBuffer.subarray(6, 8),
-    authority: fullBuffer.subarray(8, 10),
-    additional: fullBuffer.subarray(10, 12),
-  }
-}
-
 /**
  * Example value: 0xAAAA
  */
@@ -54,20 +41,14 @@ const parseIntFromBuff = (buff: Buffer) => {
   return parseInt(buff.toString('hex'), 16)
 }
 
-const parseHeader = (
-  headerBuff: Buffer,
-  questionsBuff: Buffer,
-  answersBuff: Buffer,
-  authorityBuff: Buffer,
-  additionalBuff: Buffer,
-) => {
+const parseHeader = (buff: Buffer) => {
   return {
-    id: parseTransactionId(headerBuff.subarray(0, 2)),
-    flags: parseFlags(headerBuff.subarray(2)),
-    qdcount: parseIntFromBuff(questionsBuff),
-    ancount: parseIntFromBuff(answersBuff),
-    nscount: parseIntFromBuff(authorityBuff),
-    arcount: parseIntFromBuff(additionalBuff),
+    id: parseTransactionId(buff.subarray(0, 2)),
+    flags: parseFlags(buff.subarray(2, 4)),
+    qdcount: parseIntFromBuff(buff.subarray(4, 6)),
+    ancount: parseIntFromBuff(buff.subarray(6, 8)),
+    nscount: parseIntFromBuff(buff.subarray(8, 10)),
+    arcount: parseIntFromBuff(buff.subarray(10, 12)),
   }
 }
 
@@ -83,23 +64,15 @@ const main = async () => {
     'packages/dns/fixtures/response.bin',
   )
 
-  const bufferSections = dnsResponseToBufferSections(dnsResponseFile)
-
   const parsed = {
-    header: parseHeader(
-      bufferSections.header,
-      bufferSections.questions,
-      bufferSections.answers,
-      bufferSections.authority,
-      bufferSections.additional,
-    ),
+    header: parseHeader(dnsResponseFile.subarray(0, 12)),
     questions: 'TODO',
     answers: 'TODO',
     authority: 'TODO',
     additional: 'TODO',
   }
 
-  console.log('parsed', parsed)
+  console.log(JSON.stringify(parsed, null, 2))
 }
 
 main()
