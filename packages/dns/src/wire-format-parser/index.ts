@@ -52,11 +52,43 @@ const parseHeader = (buff: Buffer) => {
   }
 }
 
+const parseQuestions = (buff: Buffer) => {
+  const MAX_ITERATIONS = 10
+  let iteration = 0
+
+  let index = 0
+  let nextLength = 0
+  const labels: string[] = []
+
+  do {
+    iteration++
+
+    if (iteration > MAX_ITERATIONS) {
+      console.error('Reached max iterations. Bailing out.')
+      break
+    }
+
+    nextLength = parseIntFromBuff(buff.subarray(index, index + 1))
+
+    const label = buff
+      .subarray(index + 1, index + nextLength + 1)
+      .toString('utf8')
+    labels.push(label)
+
+    index += nextLength + 1
+  } while (nextLength > 0)
+
+  return {
+    name: labels.filter(Boolean).join('.'),
+    type: parseIntFromBuff(buff.subarray(index, index + 2)),
+    class: parseIntFromBuff(buff.subarray(index + 2, index + 4)),
+  }
+}
+
 /**
- *         [TxId][Flgs]                                 [    "google"   ]    ["com" ]
- * <Buffer aa aa 81 80 00 01 00 01 00 00 00 00 06 67 6f 6f 67 6c 65 03 63 6f 6d 00 00 01 00 01 c0 0c 00 01 00 01 00 00 01 05 00 04 8e fb 29 0e>
- *
- * Flags: <Buffer 81 80> =>
+ * Example: <Buffer aa aa 81 80 00 01 00 01 00 00 00 00 06 67 6f 6f 67 6c 65 03 63 6f 6d 00 00 01 00 01 c0 0c 00 01 00 01 00 00 01 05 00 04 8e fb 29 0e>
+ *                  [TxId][Flgs][Qstn][Ansr][Auth][Addl][            "google.com"         ] [Type][Clss][                    Answers                  ]
+ *                  [              Header              ][                  Questions                   ]
  */
 
 const main = async () => {
@@ -66,7 +98,7 @@ const main = async () => {
 
   const parsed = {
     header: parseHeader(dnsResponseFile.subarray(0, 12)),
-    questions: 'TODO',
+    questions: parseQuestions(dnsResponseFile.subarray(12)), // No end parameter because we don't yet know how many bytes long the questions section is.
     answers: 'TODO',
     authority: 'TODO',
     additional: 'TODO',
