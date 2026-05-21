@@ -1,5 +1,14 @@
 import fs from 'node:fs/promises'
 
+interface ResourceRecord {
+  name: string
+  type: number
+  class: number
+  ttl: number // seconds
+  rdlength: number // byte length of rdata
+  rdata: string // raw bytes (to be interpreted per type later)
+}
+
 const readDnsResponseFile = async (path: string) => {
   return fs.readFile(path)
 }
@@ -9,11 +18,11 @@ const dnsResponseToBufferSections = (buff: Buffer) => {
 
   return {
     full: fullBuffer,
-    header: fullBuffer.subarray(0, 11),
-    questions: 'TBD',
-    answers: 'TBD',
-    authority: 'TBD',
-    additional: 'TBD',
+    header: fullBuffer.subarray(0, 4),
+    questions: fullBuffer.subarray(4, 6),
+    answers: fullBuffer.subarray(6, 8),
+    authority: fullBuffer.subarray(8, 10),
+    additional: fullBuffer.subarray(10, 12),
   }
 }
 
@@ -41,28 +50,26 @@ const parseFlags = (buff: Buffer) => {
   }
 }
 
-const parseHeader = (buff: Buffer) => {
-  return {
-    id: parseTransactionId(buff.subarray(0, 2)),
-    flags: parseFlags(buff.subarray(0, 2)),
-  }
+const parseIntFromBuff = (buff: Buffer) => {
+  return parseInt(buff.toString('hex'), 16)
 }
 
-// const parseQuestions = (buff: Buffer) => {
-//   return 'TBD'
-// }
-
-// const parseAnswers = (buff: Buffer) => {
-//   return 'TBD'
-// }
-
-// const parseAuthority = (buff: Buffer) => {
-//   return 'TBD'
-// }
-
-// const parseAdditional = (buff: Buffer) => {
-//   return 'TBD'
-// }
+const parseHeader = (
+  headerBuff: Buffer,
+  questionsBuff: Buffer,
+  answersBuff: Buffer,
+  authorityBuff: Buffer,
+  additionalBuff: Buffer,
+) => {
+  return {
+    id: parseTransactionId(headerBuff.subarray(0, 2)),
+    flags: parseFlags(headerBuff.subarray(2)),
+    qdcount: parseIntFromBuff(questionsBuff),
+    ancount: parseIntFromBuff(answersBuff),
+    nscount: parseIntFromBuff(authorityBuff),
+    arcount: parseIntFromBuff(additionalBuff),
+  }
+}
 
 /**
  *         [TxId][Flgs]                                 [    "google"   ]    ["com" ]
@@ -79,11 +86,17 @@ const main = async () => {
   const bufferSections = dnsResponseToBufferSections(dnsResponseFile)
 
   const parsed = {
-    header: parseHeader(bufferSections.header),
-    // questions: parseQuestions(bufferSections.questions),
-    // answers: parseAnswers(bufferSections.answers),
-    // authority: parseAuthority(bufferSections.authority),
-    // additional: parseAdditional(bufferSections.additional),
+    header: parseHeader(
+      bufferSections.header,
+      bufferSections.questions,
+      bufferSections.answers,
+      bufferSections.authority,
+      bufferSections.additional,
+    ),
+    questions: 'TODO',
+    answers: 'TODO',
+    authority: 'TODO',
+    additional: 'TODO',
   }
 
   console.log('parsed', parsed)
