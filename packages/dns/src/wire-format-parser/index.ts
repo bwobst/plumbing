@@ -46,7 +46,7 @@ const parseFlags = (buff: Buffer) => {
     tc: (flags >> 9) & 0b1, // truncated
     rd: (flags >> 8) & 0b1, // recursion desired
     ra: (flags >> 7) & 0b1, // recursion available
-    rcode: 'TODO', // reply code
+    rcode: (flags >> 3) & 0b1111, // reply code
   }
 }
 
