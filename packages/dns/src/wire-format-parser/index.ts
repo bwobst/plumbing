@@ -1,34 +1,68 @@
 import fs from 'node:fs/promises'
 
-/**
- * Checks if header ID matches 0xAAAA
- *
- * @param headerBuffer Buffer
- * @returns bool
- */
-const verifyHeaderID = (dnsResponseBufferHeader: Buffer) => {
-  return dnsResponseBufferHeader.toString('hex') === 'aaaa'
+const readDnsResponseFile = async (path: string) => {
+  return fs.readFile(path)
 }
 
-/**
- * 1000000110000000
- *
- * @param dnsResponseBufferFlags
- * @returns
- */
-const parseFlags = (dnsResponseBufferFlags: Buffer) => {
-  const flags = dnsResponseBufferFlags.readUInt16BE()
+const dnsResponseToBufferSections = (buff: Buffer) => {
+  const fullBuffer = Buffer.from(buff)
 
   return {
-    qr: (flags >> 15) & 0b1,        // query/response
-    opcode: (flags >> 11) & 0b1111, // opcode
-    aa: (flags >> 10) & 0b1,        // authoritative answer
-    tc: (flags >> 9) & 0b1,         // truncated
-    rd: (flags >> 8) & 0b1,         // recursion desired
-    ra: (flags >> 7) & 0b1,         // recursion available
-    rcode: null,                    // reply code
+    full: fullBuffer,
+    header: fullBuffer.subarray(0, 11),
+    questions: 'TBD',
+    answers: 'TBD',
+    authority: 'TBD',
+    additional: 'TBD',
   }
 }
+
+/**
+ * Example value: 0xAAAA
+ */
+const parseTransactionId = (buff: Buffer) => {
+  return `0x${buff.toString('hex').toUpperCase()}`
+}
+
+/**
+ * Example value: 1000000110000000
+ */
+const parseFlags = (buff: Buffer) => {
+  const flags = buff.readUInt16BE()
+
+  return {
+    qr: (flags >> 15) & 0b1, // query/response
+    opcode: (flags >> 11) & 0b1111, // opcode
+    aa: (flags >> 10) & 0b1, // authoritative answer
+    tc: (flags >> 9) & 0b1, // truncated
+    rd: (flags >> 8) & 0b1, // recursion desired
+    ra: (flags >> 7) & 0b1, // recursion available
+    rcode: 'TODO', // reply code
+  }
+}
+
+const parseHeader = (buff: Buffer) => {
+  return {
+    id: parseTransactionId(buff.subarray(0, 2)),
+    flags: parseFlags(buff.subarray(0, 2)),
+  }
+}
+
+// const parseQuestions = (buff: Buffer) => {
+//   return 'TBD'
+// }
+
+// const parseAnswers = (buff: Buffer) => {
+//   return 'TBD'
+// }
+
+// const parseAuthority = (buff: Buffer) => {
+//   return 'TBD'
+// }
+
+// const parseAdditional = (buff: Buffer) => {
+//   return 'TBD'
+// }
 
 /**
  *         [TxId][Flgs]                                 [    "google"   ]    ["com" ]
@@ -38,21 +72,21 @@ const parseFlags = (dnsResponseBufferFlags: Buffer) => {
  */
 
 const main = async () => {
-  const dnsResponseFile = await fs.readFile(
+  const dnsResponseFile = await readDnsResponseFile(
     'packages/dns/fixtures/response.bin',
   )
 
-  const fullBuffer = Buffer.from(dnsResponseFile)
-  const buffer = {
-    full: fullBuffer,
-    header: fullBuffer.subarray(0, 2),
-    body: fullBuffer.subarray(2),
+  const bufferSections = dnsResponseToBufferSections(dnsResponseFile)
+
+  const parsed = {
+    header: parseHeader(bufferSections.header),
+    // questions: parseQuestions(bufferSections.questions),
+    // answers: parseAnswers(bufferSections.answers),
+    // authority: parseAuthority(bufferSections.authority),
+    // additional: parseAdditional(bufferSections.additional),
   }
 
-  const hasValidHeaderID = verifyHeaderID(buffer.header)
-
-  const flags = parseFlags(buffer.body.subarray(0, 2))
-  console.log(flags)
+  console.log('parsed', parsed)
 }
 
 main()
