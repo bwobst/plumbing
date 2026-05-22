@@ -1,6 +1,6 @@
-# Plumbing
+# Web Internals From Scratch
 
-A webstack-from-scratch project that implements miniature versions of common web technologies to explore how they actually work.
+A project that implements miniature versions of common web technologies to explore how they actually work.
 
 ## Monorepo
 
