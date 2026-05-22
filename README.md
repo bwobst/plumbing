@@ -20,6 +20,8 @@ pnpm lint             # lint and format check (Biome)
 pnpm lint:fix         # apply safe lint and format fixes
 pnpm typecheck        # typecheck every package
 pnpm check            # lint + typecheck
+pnpm test             # run all package tests (Vitest)
+pnpm test:watch       # re-run tests on change
 ```
 
 ### @dns scripts

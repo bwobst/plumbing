@@ -12,12 +12,15 @@
     "format": "biome format --write .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "typecheck": "pnpm -r run typecheck"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r run typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.0",
     "@types/node": "^25.9.1",
     "tsx": "^4.19.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
   }
 }

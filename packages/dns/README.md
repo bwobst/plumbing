@@ -4,6 +4,16 @@ DNS learning utilities — wire-format parsing, capture scripts, and (eventually
 
 ## Scripts
 
+### Tests
+
+```bash
+pnpm test                              # all workspace packages
+pnpm --filter @dns test                # this package only
+pnpm --filter @dns test:watch          # watch mode
+```
+
+Tests live next to source as `*.test.ts`. Step 1 **Done when** criteria belong in `src/wire-format-parser/index.test.ts` (see curriculum spec).
+
 ### One-time script execution
 
 ```bash
