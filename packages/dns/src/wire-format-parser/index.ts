@@ -1,4 +1,15 @@
 import fs from 'node:fs/promises'
+import {
+  buffToBin,
+  buffToDec,
+  buffToHex,
+  uint8ToBin,
+  uint8ToDec,
+  uint8ToHex,
+  uint16ToBin,
+  uint16ToDec,
+  uint16ToHex,
+} from '../byte-view.js'
 
 interface ResourceRecord {
   name: string
@@ -16,15 +27,15 @@ const readDnsResponseFile = async (path: string) => {
 /**
  * Example value: 0xAAAA
  */
-const parseTransactionId = (buff: Buffer) => {
-  return `0x${buff.toString('hex').toUpperCase()}`
+const parseTransactionId = (buffer: Buffer) => {
+  return `0x${buffer.toString('hex').toUpperCase()}`
 }
 
 /**
  * Example value: 1000000110000000
  */
-const parseFlags = (buff: Buffer) => {
-  const flags = buff.readUInt16BE()
+const parseFlags = (buffer: Buffer) => {
+  const flags = buffer.readUInt16BE()
 
   return {
     qr: (flags >> 15) & 0b1, // query/response
@@ -37,28 +48,29 @@ const parseFlags = (buff: Buffer) => {
   }
 }
 
-const parseIntFromBuff = (buff: Buffer) => {
-  return parseInt(buff.toString('hex'), 16)
+const parseIntFromBuff = (buffer: Buffer) => {
+  return parseInt(buffer.toString('hex'), 16)
 }
 
-const parseHeader = (buff: Buffer) => {
+const parseHeader = (buffer: Buffer) => {
   return {
-    id: parseTransactionId(buff.subarray(0, 2)),
-    flags: parseFlags(buff.subarray(2, 4)),
-    qdcount: parseIntFromBuff(buff.subarray(4, 6)),
-    ancount: parseIntFromBuff(buff.subarray(6, 8)),
-    nscount: parseIntFromBuff(buff.subarray(8, 10)),
-    arcount: parseIntFromBuff(buff.subarray(10, 12)),
+    id: parseTransactionId(buffer.subarray(0, 2)),
+    flags: parseFlags(buffer.subarray(2, 4)),
+    qdcount: parseIntFromBuff(buffer.subarray(4, 6)),
+    ancount: parseIntFromBuff(buffer.subarray(6, 8)),
+    nscount: parseIntFromBuff(buffer.subarray(8, 10)),
+    arcount: parseIntFromBuff(buffer.subarray(10, 12)),
   }
 }
 
-const parseQuestions = (buff: Buffer) => {
+const parseQuestions = (buffer: Buffer) => {
   const MAX_ITERATIONS = 10
   let iteration = 0
 
   let index = 0
-  let nextLength = 0
+  let length = 0
   const labels: string[] = []
+  let totalLength = 4 // Two bytes for type and two bytes for class
 
   do {
     iteration++
@@ -68,21 +80,31 @@ const parseQuestions = (buff: Buffer) => {
       break
     }
 
-    nextLength = parseIntFromBuff(buff.subarray(index, index + 1))
+    length = parseIntFromBuff(buffer.subarray(index, index + 1))
+    totalLength += length + 1 // +1 to account for length-prefix for each label
 
-    const label = buff
-      .subarray(index + 1, index + nextLength + 1)
+    const label = buffer
+      .subarray(index + 1, index + length + 1)
       .toString('utf8')
     labels.push(label)
 
-    index += nextLength + 1
-  } while (nextLength > 0)
+    index += length + 1
+  } while (length > 0)
 
   return {
     name: labels.filter(Boolean).join('.'),
-    type: parseIntFromBuff(buff.subarray(index, index + 2)),
-    class: parseIntFromBuff(buff.subarray(index + 2, index + 4)),
+    type: parseIntFromBuff(buffer.subarray(index, index + 2)),
+    class: parseIntFromBuff(buffer.subarray(index + 2, index + 4)),
+    totalLength,
   }
+}
+
+const parseResourceRecord = (buffer: Buffer) => {
+  console.log('parseResourceRecord', {
+    buffer,
+    bin: buffToBin(buffer),
+    dec: buffToDec(buffer),
+  })
 }
 
 /**
@@ -96,15 +118,22 @@ const main = async () => {
     'packages/dns/fixtures/response.bin',
   )
 
+  const HEADER_LENGTH = 12
+
+  const questions = parseQuestions(dnsResponseFile.subarray(HEADER_LENGTH)) // No end parameter because we don't yet know how many bytes long the questions section is.
+  const answers = parseResourceRecord(
+    dnsResponseFile.subarray(HEADER_LENGTH + questions.totalLength),
+  )
+
   const parsed = {
-    header: parseHeader(dnsResponseFile.subarray(0, 12)),
-    questions: parseQuestions(dnsResponseFile.subarray(12)), // No end parameter because we don't yet know how many bytes long the questions section is.
-    answers: 'TODO',
+    header: parseHeader(dnsResponseFile.subarray(0, HEADER_LENGTH)),
+    questions,
+    answers,
     authority: 'TODO',
     additional: 'TODO',
   }
 
-  console.log(JSON.stringify(parsed, null, 2))
+  // console.log('parsed:', JSON.stringify(parsed, null, 2))
 }
 
 main()
