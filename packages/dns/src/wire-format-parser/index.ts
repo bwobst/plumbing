@@ -103,8 +103,12 @@ const parseResourceRecord = (buffer: Buffer) => {
   console.log('parseResourceRecord', {
     buffer,
     bin: buffToBin(buffer),
-    dec: buffToDec(buffer),
   })
+
+  // Name pointer is indicated by the two left-most bits being `11`.
+  const namePointerBytes = buffer.subarray(0, 2).readUInt16BE()
+  const isNamePointer = namePointerBytes >> 14 === 0b11
+  console.log('isNamePointer', isNamePointer)
 }
 
 /**
@@ -112,7 +116,6 @@ const parseResourceRecord = (buffer: Buffer) => {
  *                  [TxId][Flgs][Qstn][Ansr][Auth][Addl][            "google.com"         ] [Type][Clss][                    Answers                  ]
  *                  [              Header              ][                  Questions                   ]
  */
-
 const main = async () => {
   const dnsResponseFile = await readDnsResponseFile(
     'packages/dns/fixtures/response.bin',

@@ -2,6 +2,8 @@
 
 A project that implements miniature versions of common web technologies to explore how they actually work.
 
+See [docs/CURRICULUM.md](./docs/CURRICULUM.md) for the full learning path and [AGENTS.md](./AGENTS.md) for how to work with an AI tutor on this repo.
+
 ## Monorepo
 
 This repo is a [pnpm](https://pnpm.io) workspace. Each package under `packages/*` is a TypeScript 6 project (`target` ES2025). Scripts run via [tsx](https://github.com/privatenumber/tsx) (no compile step).
