@@ -1,15 +1,12 @@
 import fs from 'node:fs/promises'
-import {
-  buffToBin,
-  buffToDec,
-  buffToHex,
-  uint8ToBin,
-  uint8ToDec,
-  uint8ToHex,
-  uint16ToBin,
-  uint16ToDec,
-  uint16ToHex,
-} from '../byte-view.js'
+import { uint16ToDec } from '../byte-view.js'
+
+/**
+ * Terminology:
+ * - Buffer / subarray → bytes on the wire
+ * - readUInt16BE() result → a uint16 or 16-bit field
+ * - & / >> in comments → bits (which positions you keep or drop)
+ */
 
 interface ResourceRecord {
   name: string
@@ -17,7 +14,7 @@ interface ResourceRecord {
   class: number
   ttl: number // seconds
   rdlength: number // byte length of rdata
-  rdata: string // raw bytes (to be interpreted per type later)
+  rdata: Buffer // raw bytes (to be interpreted per type later)
 }
 
 const readDnsResponseFile = async (path: string) => {
@@ -70,7 +67,7 @@ const parseQuestions = (buffer: Buffer) => {
   let index = 0
   let length = 0
   const labels: string[] = []
-  let totalLength = 4 // Two bytes for type and two bytes for class
+  let totalLength = 4 // Octet for type and octet for class
 
   do {
     iteration++
@@ -99,16 +96,35 @@ const parseQuestions = (buffer: Buffer) => {
   }
 }
 
-const parseResourceRecord = (buffer: Buffer) => {
-  console.log('parseResourceRecord', {
-    buffer,
-    bin: buffToBin(buffer),
-  })
-
-  // Name pointer is indicated by the two left-most bits being `11`.
+const parseResourceRecord = (
+  buffer: Buffer,
+  fullBuffer: Buffer,
+): ResourceRecord => {
+  // Name pointer is indicated by the top two bits being `11`.
   const namePointerBytes = buffer.subarray(0, 2).readUInt16BE()
   const isNamePointer = namePointerBytes >> 14 === 0b11
   console.log('isNamePointer', isNamePointer)
+
+  // 0x3fff = [0x3f, 0xff] = 00111111 11111111
+  const bitMask = 0x3fff
+
+  const namePointerOffset = parseInt(
+    uint16ToDec(namePointerBytes & bitMask),
+    10,
+  )
+
+  const parsedQuestionByOffset = parseQuestions(
+    fullBuffer.subarray(namePointerOffset),
+  )
+
+  return {
+    name: parsedQuestionByOffset.name,
+    type: parseIntFromBuff(buffer.subarray(2, 4)),
+    class: parseIntFromBuff(buffer.subarray(4, 6)),
+    ttl: parseIntFromBuff(buffer.subarray(6, 10)),
+    rdlength: parseIntFromBuff(buffer.subarray(10, 12)),
+    rdata: buffer.subarray(12),
+  }
 }
 
 /**
@@ -126,17 +142,16 @@ const main = async () => {
   const questions = parseQuestions(dnsResponseFile.subarray(HEADER_LENGTH)) // No end parameter because we don't yet know how many bytes long the questions section is.
   const answers = parseResourceRecord(
     dnsResponseFile.subarray(HEADER_LENGTH + questions.totalLength),
+    dnsResponseFile,
   )
 
   const parsed = {
     header: parseHeader(dnsResponseFile.subarray(0, HEADER_LENGTH)),
     questions,
     answers,
-    authority: 'TODO',
-    additional: 'TODO',
   }
 
-  // console.log('parsed:', JSON.stringify(parsed, null, 2))
+  console.log('parsed', JSON.stringify(parsed, null, 2))
 }
 
 main()
