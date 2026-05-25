@@ -13,12 +13,14 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r run typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.0",
     "@types/node": "^25.9.1",
+    "@vitest/coverage-v8": "^4.1.7",
     "tsx": "^4.19.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.7"

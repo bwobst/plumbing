@@ -21,6 +21,7 @@ pnpm lint:fix         # apply safe lint and format fixes
 pnpm typecheck        # typecheck every package
 pnpm check            # lint + typecheck
 pnpm test             # run all package tests (Vitest)
+pnpm test:coverage    # run tests with coverage report
 pnpm test:watch       # re-run tests on change
 ```
 

@@ -1,5 +1,4 @@
-import fs from 'node:fs/promises'
-import { uint16ToDec } from '../byte-view.js'
+import { uint16ToDec } from '../../byte-view.js'
 
 /**
  * Terminology:
@@ -7,6 +6,35 @@ import { uint16ToDec } from '../byte-view.js'
  * - readUInt16BE() result → a uint16 or 16-bit field
  * - & / >> in comments → bits (which positions you keep or drop)
  */
+
+const HEADER_LENGTH = 12
+
+interface DnsMessage {
+  header: {
+    transactionId: string
+    flags: {
+      qr: number
+      opcode: number
+      aa: number
+      tc: number
+      rd: number
+      ra: number
+      rcode: number
+    }
+    qdcount: number
+    ancount: number
+    nscount: number
+    arcount: number
+  }
+  questions: {
+    name: string
+    type: number
+    class: number
+    totalLength: number
+  }
+  answers: ResourceRecord
+  additional?: ResourceRecord
+}
 
 interface ResourceRecord {
   name: string
@@ -17,15 +45,11 @@ interface ResourceRecord {
   rdata: Buffer // raw bytes (to be interpreted per type later)
 }
 
-const readDnsResponseFile = async (path: string) => {
-  return fs.readFile(path)
-}
-
 /**
  * Example value: 0xAAAA
  */
 const parseTransactionId = (buffer: Buffer) => {
-  return `0x${buffer.toString('hex').toUpperCase()}`
+  return `0x${buffer.toString('hex')}`
 }
 
 /**
@@ -51,7 +75,7 @@ const parseIntFromBuff = (buffer: Buffer) => {
 
 const parseHeader = (buffer: Buffer) => {
   return {
-    id: parseTransactionId(buffer.subarray(0, 2)),
+    transactionId: parseTransactionId(buffer.subarray(0, 2)),
     flags: parseFlags(buffer.subarray(2, 4)),
     qdcount: parseIntFromBuff(buffer.subarray(4, 6)),
     ancount: parseIntFromBuff(buffer.subarray(6, 8)),
@@ -103,7 +127,7 @@ const parseResourceRecord = (
   // Name pointer is indicated by the top two bits being `11`.
   const namePointerBytes = buffer.subarray(0, 2).readUInt16BE()
   const isNamePointer = namePointerBytes >> 14 === 0b11
-  console.log('isNamePointer', isNamePointer)
+  // console.log('isNamePointer', isNamePointer)
 
   // 0x3fff = [0x3f, 0xff] = 00111111 11111111
   const bitMask = 0x3fff
@@ -127,31 +151,17 @@ const parseResourceRecord = (
   }
 }
 
-/**
- * Example: <Buffer aa aa 81 80 00 01 00 01 00 00 00 00 06 67 6f 6f 67 6c 65 03 63 6f 6d 00 00 01 00 01 c0 0c 00 01 00 01 00 00 01 05 00 04 8e fb 29 0e>
- *                  [TxId][Flgs][Qstn][Ansr][Auth][Addl][            "google.com"         ] [Type][Clss][                    Answers                  ]
- *                  [              Header              ][                  Questions                   ]
- */
-const main = async () => {
-  const dnsResponseFile = await readDnsResponseFile(
-    'packages/dns/fixtures/response.bin',
-  )
+const decodeDnsMessage = async (buffer: Buffer): Promise<DnsMessage> => {
+  const questions = parseQuestions(buffer.subarray(HEADER_LENGTH))
 
-  const HEADER_LENGTH = 12
-
-  const questions = parseQuestions(dnsResponseFile.subarray(HEADER_LENGTH)) // No end parameter because we don't yet know how many bytes long the questions section is.
-  const answers = parseResourceRecord(
-    dnsResponseFile.subarray(HEADER_LENGTH + questions.totalLength),
-    dnsResponseFile,
-  )
-
-  const parsed = {
-    header: parseHeader(dnsResponseFile.subarray(0, HEADER_LENGTH)),
+  return {
+    header: parseHeader(buffer),
     questions,
-    answers,
+    answers: parseResourceRecord(
+      buffer.subarray(HEADER_LENGTH + questions.totalLength),
+      buffer,
+    ),
   }
-
-  console.log('parsed', JSON.stringify(parsed, null, 2))
 }
 
-main()
+export default decodeDnsMessage

@@ -5,5 +5,12 @@ export default defineConfig({
     name: '@dns',
     include: ['src/**/*.test.ts'],
     root: import.meta.dirname,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/**/run.ts'],
+      reportsDirectory: './coverage',
+      reporter: ['text', 'html', 'lcov'],
+    },
   },
 })

@@ -8,7 +8,9 @@ DNS learning utilities — wire-format parsing, capture scripts, and (eventually
 
 ```bash
 pnpm test                              # all workspace packages
+pnpm test:coverage                     # all packages, with coverage
 pnpm --filter @dns test                # this package only
+pnpm --filter @dns test:coverage       # this package, with coverage
 pnpm --filter @dns test:watch          # watch mode
 ```
 
