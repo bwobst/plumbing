@@ -11,7 +11,7 @@ describe('decodeDnsMessage', async () => {
 
   const decoded = await decodeDnsMessage(mockBuffer)
 
-  it('parses header', () => {
+  it('decodes the header', () => {
     expect(decoded.header).toStrictEqual({
       transactionId: '0xaaaa',
       flags: {
@@ -30,7 +30,7 @@ describe('decodeDnsMessage', async () => {
     })
   })
 
-  it('parses questions', () => {
+  it('decodes the questions', () => {
     expect(decoded.questions).toStrictEqual({
       name: 'google.com',
       class: 1,
@@ -39,7 +39,7 @@ describe('decodeDnsMessage', async () => {
     })
   })
 
-  it('parses answers', () => {
+  it('decodes the answers', () => {
     expect(decoded.answers).toStrictEqual({
       name: 'google.com',
       type: 1,

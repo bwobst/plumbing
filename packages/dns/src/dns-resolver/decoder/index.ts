@@ -1,4 +1,5 @@
 import { uint16ToDec } from '../../byte-view.js'
+import type { DnsMessage, ResourceRecord } from '../interfaces.js'
 
 /**
  * Terminology:
@@ -9,53 +10,19 @@ import { uint16ToDec } from '../../byte-view.js'
 
 const HEADER_LENGTH = 12
 
-interface DnsMessage {
-  header: {
-    transactionId: string
-    flags: {
-      qr: number
-      opcode: number
-      aa: number
-      tc: number
-      rd: number
-      ra: number
-      rcode: number
-    }
-    qdcount: number
-    ancount: number
-    nscount: number
-    arcount: number
-  }
-  questions: {
-    name: string
-    type: number
-    class: number
-    totalLength: number
-  }
-  answers: ResourceRecord
-  additional?: ResourceRecord
-}
-
-interface ResourceRecord {
-  name: string
-  type: number
-  class: number
-  ttl: number // seconds
-  rdlength: number // byte length of rdata
-  rdata: Buffer // raw bytes (to be interpreted per type later)
-}
-
 /**
- * Example value: 0xAAAA
+ * Example input: [0xaa, 0xaa]
+ * Example output: 0xaaaa
  */
-const parseTransactionId = (buffer: Buffer) => {
+const decodeTransactionId = (buffer: Buffer) => {
   return `0x${buffer.toString('hex')}`
 }
 
 /**
- * Example value: 1000000110000000
+ * Example input: [0x81, 0x80]
+ * Example output: 1000000110000000
  */
-const parseFlags = (buffer: Buffer) => {
+const decodeFlags = (buffer: Buffer) => {
   const flags = buffer.readUInt16BE()
 
   return {
@@ -73,10 +40,10 @@ const parseIntFromBuff = (buffer: Buffer) => {
   return parseInt(buffer.toString('hex'), 16)
 }
 
-const parseHeader = (buffer: Buffer) => {
+const decodeHeader = (buffer: Buffer) => {
   return {
-    transactionId: parseTransactionId(buffer.subarray(0, 2)),
-    flags: parseFlags(buffer.subarray(2, 4)),
+    transactionId: decodeTransactionId(buffer.subarray(0, 2)),
+    flags: decodeFlags(buffer.subarray(2, 4)),
     qdcount: parseIntFromBuff(buffer.subarray(4, 6)),
     ancount: parseIntFromBuff(buffer.subarray(6, 8)),
     nscount: parseIntFromBuff(buffer.subarray(8, 10)),
@@ -84,7 +51,7 @@ const parseHeader = (buffer: Buffer) => {
   }
 }
 
-const parseQuestions = (buffer: Buffer) => {
+const decodeQuestions = (buffer: Buffer) => {
   const MAX_ITERATIONS = 10
   let iteration = 0
 
@@ -120,7 +87,7 @@ const parseQuestions = (buffer: Buffer) => {
   }
 }
 
-const parseResourceRecord = (
+const decodeResourceRecord = (
   buffer: Buffer,
   fullBuffer: Buffer,
 ): ResourceRecord => {
@@ -137,12 +104,12 @@ const parseResourceRecord = (
     10,
   )
 
-  const parsedQuestionByOffset = parseQuestions(
+  const decodedQuestionByOffset = decodeQuestions(
     fullBuffer.subarray(namePointerOffset),
   )
 
   return {
-    name: parsedQuestionByOffset.name,
+    name: decodedQuestionByOffset.name,
     type: parseIntFromBuff(buffer.subarray(2, 4)),
     class: parseIntFromBuff(buffer.subarray(4, 6)),
     ttl: parseIntFromBuff(buffer.subarray(6, 10)),
@@ -152,12 +119,12 @@ const parseResourceRecord = (
 }
 
 const decodeDnsMessage = async (buffer: Buffer): Promise<DnsMessage> => {
-  const questions = parseQuestions(buffer.subarray(HEADER_LENGTH))
+  const questions = decodeQuestions(buffer.subarray(HEADER_LENGTH))
 
   return {
-    header: parseHeader(buffer),
+    header: decodeHeader(buffer),
     questions,
-    answers: parseResourceRecord(
+    answers: decodeResourceRecord(
       buffer.subarray(HEADER_LENGTH + questions.totalLength),
       buffer,
     ),
