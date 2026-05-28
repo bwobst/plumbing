@@ -41,10 +41,32 @@ const encodeHeader = (header: DnsMessage['header']) => {
   ])
 }
 
+const encodeName = (name: string) => {
+  return Buffer.concat([
+    ...name.split('.').map((label) =>
+      Buffer.concat([
+        // length of next label
+        Buffer.from((label.length & 0xff).toString(16).padStart(2, '0'), 'hex'),
+        Buffer.from(label),
+      ]),
+    ),
+    Buffer.from((0x00).toString(16).padStart(2, '0'), 'hex'), // null byte
+  ])
+}
+
+const encodeQuestions = (questions: DnsMessage['questions']) => {
+  console.log('questions', questions)
+  return Buffer.concat([
+    encodeName(questions.name),
+    encodeCount(questions.type),
+    encodeCount(questions.class),
+  ])
+}
+
 const encodeDnsMessage = async (dnsMessage: DnsMessage): Promise<Buffer> => {
   return Buffer.concat([
     encodeHeader(dnsMessage.header),
-    // encodeQuestions(),
+    encodeQuestions(dnsMessage.questions),
     // encodeAnswers(),
   ])
 }

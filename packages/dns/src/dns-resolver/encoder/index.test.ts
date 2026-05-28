@@ -55,9 +55,24 @@ describe('encodeDnsMessage', async () => {
     })
   })
 
-  // it('encodes the questions', () => {
-  //   expect(encoded.subarray(5, 7)).toEqual(Buffer.from([0x00, 0x01]))
-  // })
+  describe('encodes the questions', () => {
+    it('encodes the length-prefixed label', () => {
+      expect(encoded.subarray(12, 24)).toEqual(
+        Buffer.from([
+          0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d,
+          0x00,
+        ]),
+      )
+    })
+
+    it('encodes the type', () => {
+      expect(encoded.subarray(24, 26)).toEqual(Buffer.from([0x00, 0x01]))
+    })
+
+    it('encodes the class', () => {
+      expect(encoded.subarray(26, 28)).toEqual(Buffer.from([0x00, 0x01]))
+    })
+  })
 
   // it('encodes the answers', () => {
   // expect(encoded.answers).toStrictEqual({

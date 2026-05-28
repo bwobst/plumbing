@@ -25,8 +25,6 @@ const decodeTransactionId = (buffer: Buffer) => {
 const decodeFlags = (buffer: Buffer) => {
   const flags = buffer.readUInt16BE()
 
-  console.log('decoder flags', uint16ToBin(flags))
-
   return {
     qr: (flags >> 15) & 0b1, // query/response
     opcode: (flags >> 11) & 0b1111, // opcode
@@ -60,7 +58,7 @@ const decodeQuestions = (buffer: Buffer) => {
   let index = 0
   let length = 0
   const labels: string[] = []
-  let totalLength = 4 // Octet for type and octet for class
+  let totalLength = 4 // Two octets: one for type and one for class
 
   do {
     iteration++
