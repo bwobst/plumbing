@@ -1,4 +1,4 @@
-import { uint16ToDec } from '../../byte-view.js'
+import { uint16ToBin, uint16ToDec } from '../../byte-view.js'
 import type { DnsMessage, ResourceRecord } from '../interfaces.js'
 
 /**
@@ -20,10 +20,12 @@ const decodeTransactionId = (buffer: Buffer) => {
 
 /**
  * Example input: [0x81, 0x80]
- * Example output: 1000000110000000
+ * Example output: 10000001 10000000
  */
 const decodeFlags = (buffer: Buffer) => {
   const flags = buffer.readUInt16BE()
+
+  console.log('decoder flags', uint16ToBin(flags))
 
   return {
     qr: (flags >> 15) & 0b1, // query/response

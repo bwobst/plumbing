@@ -38,9 +38,35 @@ describe('encodeDnsMessage', async () => {
 
   const encoded = await encodeDnsMessage(mockDnsMessage)
 
-  it('encodes the header', () => {
-    expect(encoded.subarray(0, 5)).toEqual(
-      Buffer.from([0xaa, 0xaa, 0x81, 0x80]),
-    )
+  describe('encodes the header', () => {
+    it('encodes the transaction ID', () => {
+      expect(encoded.subarray(0, 2)).toEqual(Buffer.from([0xaa, 0xaa]))
+    })
+
+    it('encodes the flags', () => {
+      expect(encoded.subarray(2, 4)).toEqual(Buffer.from([0x81, 0x80]))
+    })
+
+    it('encodes the counts', () => {
+      expect(encoded.subarray(4, 6)).toEqual(Buffer.from([0x00, 0x01]))
+      expect(encoded.subarray(6, 8)).toEqual(Buffer.from([0x00, 0x01]))
+      expect(encoded.subarray(8, 10)).toEqual(Buffer.from([0x00, 0x00]))
+      expect(encoded.subarray(10, 12)).toEqual(Buffer.from([0x00, 0x00]))
+    })
   })
+
+  // it('encodes the questions', () => {
+  //   expect(encoded.subarray(5, 7)).toEqual(Buffer.from([0x00, 0x01]))
+  // })
+
+  // it('encodes the answers', () => {
+  // expect(encoded.answers).toStrictEqual({
+  //   name: 'google.com',
+  //   type: 1,
+  //   class: 1,
+  //   ttl: 261,
+  //   rdlength: 4,
+  //   rdata: Buffer.from([142, 251, 41, 14]),
+  // })
+  // })
 })

@@ -1,3 +1,4 @@
+import { uint8ToHex, uint16ToBin, uint16ToHex } from '../../byte-view.js'
 import type { DnsMessage } from '../interfaces.js'
 
 /**
@@ -13,24 +14,30 @@ const encodeTransactionId = (transactionId: string) => {
  * Example output: <Buffer 81 80>
  */
 const encodeFlags = (flags: DnsMessage['header']['flags']) => {
-  let binaryString = ''
+  const result =
+    (flags.qr << 15) |
+    (flags.opcode << 14) |
+    (flags.aa << 10) |
+    (flags.tc << 9) |
+    (flags.rd << 8) |
+    (flags.ra << 7) |
+    (flags.rcode << 4)
 
-  binaryString += flags.qr
-  binaryString += String(flags.opcode).padStart(4, '0')
-  binaryString += flags.aa
-  binaryString += flags.tc
-  binaryString += flags.rd
-  binaryString += flags.ra
-  binaryString += '0000' // Hardcoded for: Z (reserved), answer authenticated, non-authenticated data
-  binaryString += String(flags.rcode).padStart(3, '0') // TODO: The hardcoded length of 3 isn't correct for all cases
+  return Buffer.from(result.toString(16), 'hex')
+}
 
-  return Buffer.from(parseInt(binaryString, 2).toString(16), 'hex')
+const encodeCount = (count: number) => {
+  return Buffer.from((count & 0xffff).toString(16).padStart(4, '0'), 'hex')
 }
 
 const encodeHeader = (header: DnsMessage['header']) => {
   return Buffer.concat([
     encodeTransactionId(header.transactionId),
     encodeFlags(header.flags),
+    encodeCount(header.qdcount),
+    encodeCount(header.ancount),
+    encodeCount(header.nscount),
+    encodeCount(header.arcount),
   ])
 }
 
