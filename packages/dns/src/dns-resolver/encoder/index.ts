@@ -1,5 +1,4 @@
-import { uint8ToHex, uint16ToBin, uint16ToHex } from '../../byte-view.js'
-import type { DnsMessage } from '../interfaces.js'
+import type { DnsMessage, ResourceRecord } from '../interfaces.js'
 
 /**
  * Example input: 0xaaaa
@@ -55,7 +54,6 @@ const encodeName = (name: string) => {
 }
 
 const encodeQuestions = (questions: DnsMessage['questions']) => {
-  console.log('questions', questions)
   return Buffer.concat([
     encodeName(questions.name),
     encodeCount(questions.type),
@@ -63,12 +61,41 @@ const encodeQuestions = (questions: DnsMessage['questions']) => {
   ])
 }
 
-const encodeDnsMessage = async (dnsMessage: DnsMessage): Promise<Buffer> => {
-  return Buffer.concat([
-    encodeHeader(dnsMessage.header),
-    encodeQuestions(dnsMessage.questions),
-    // encodeAnswers(),
+const encodeResoureRecord = (
+  resourceRecord: ResourceRecord,
+  offset: number,
+) => {
+  const name = Buffer.from([
+    0b11000000, // top two bits indicate that it's a name pointer
+    offset,
   ])
+
+  const type = Buffer.from([0x00, resourceRecord.type])
+
+  const clss = Buffer.from([0x00, resourceRecord.class])
+
+  const ttl = Buffer.alloc(4)
+  ttl.writeUInt32BE(resourceRecord.ttl)
+
+  const rdlength = Buffer.alloc(2)
+  rdlength.writeUint16BE(resourceRecord.rdlength)
+
+  return Buffer.concat([name, type, clss, ttl, rdlength, resourceRecord.rdata])
+}
+
+const encodeAnswers = (
+  answers: DnsMessage['answers'],
+  headerLength: number,
+) => {
+  return encodeResoureRecord(answers, headerLength)
+}
+
+const encodeDnsMessage = async (dnsMessage: DnsMessage): Promise<Buffer> => {
+  const header = encodeHeader(dnsMessage.header)
+  const questions = encodeQuestions(dnsMessage.questions)
+  const answers = encodeAnswers(dnsMessage.answers, header.length)
+
+  return Buffer.concat([header, questions, answers])
 }
 
 export default encodeDnsMessage

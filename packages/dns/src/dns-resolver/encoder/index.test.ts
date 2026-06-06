@@ -74,14 +74,33 @@ describe('encodeDnsMessage', async () => {
     })
   })
 
-  // it('encodes the answers', () => {
-  // expect(encoded.answers).toStrictEqual({
-  //   name: 'google.com',
-  //   type: 1,
-  //   class: 1,
-  //   ttl: 261,
-  //   rdlength: 4,
-  //   rdata: Buffer.from([142, 251, 41, 14]),
-  // })
-  // })
+  describe('encodes the answers', () => {
+    it('encodes the name', () => {
+      expect(encoded.subarray(28, 30)).toEqual(Buffer.from([0xc0, 0x0c]))
+    })
+
+    it('encodes the type', () => {
+      expect(encoded.subarray(30, 32)).toEqual(Buffer.from([0x00, 0x01]))
+    })
+
+    it('encodes the class', () => {
+      expect(encoded.subarray(32, 34)).toEqual(Buffer.from([0x00, 0x01]))
+    })
+
+    it('encodes the TTL', () => {
+      expect(encoded.subarray(34, 38)).toEqual(
+        Buffer.from([0x00, 0x00, 0x01, 0x05]),
+      )
+    })
+
+    it('encodes the rdlength', () => {
+      expect(encoded.subarray(38, 40)).toEqual(Buffer.from([0x00, 0x04]))
+    })
+
+    it('encodes the rdata', () => {
+      expect(encoded.subarray(40, 45)).toEqual(
+        Buffer.from([0x8e, 0xfb, 0x29, 0x0e]),
+      )
+    })
+  })
 })

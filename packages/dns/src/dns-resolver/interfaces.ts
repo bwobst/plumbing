@@ -1,3 +1,5 @@
+export const HEADER_LENGTH = 12
+
 export interface DnsMessage {
   header: {
     transactionId: string
@@ -22,7 +24,6 @@ export interface DnsMessage {
     totalLength: number
   }
   answers: ResourceRecord
-  additional?: ResourceRecord
 }
 
 export interface ResourceRecord {

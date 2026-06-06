@@ -1,5 +1,9 @@
-import { uint16ToBin, uint16ToDec } from '../../byte-view.js'
-import type { DnsMessage, ResourceRecord } from '../interfaces.js'
+import { uint16ToDec } from '../../byte-view.js'
+import {
+  type DnsMessage,
+  HEADER_LENGTH,
+  type ResourceRecord,
+} from '../interfaces.js'
 
 /**
  * Terminology:
@@ -7,8 +11,6 @@ import type { DnsMessage, ResourceRecord } from '../interfaces.js'
  * - readUInt16BE() result → a uint16 or 16-bit field
  * - & / >> in comments → bits (which positions you keep or drop)
  */
-
-const HEADER_LENGTH = 12
 
 /**
  * Example input: [0xaa, 0xaa]
