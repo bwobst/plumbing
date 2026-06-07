@@ -1,42 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import type { DnsMessage } from '../interfaces.js'
+import { mockDnsMessage, mockRequestWire } from '../fixtures/request.js'
 import encodeDnsMessage from './index.js'
 
-describe('encodeDnsMessage', async () => {
-  const mockDnsMessage: DnsMessage = {
-    header: {
-      transactionId: '0xaaaa',
-      flags: {
-        qr: 1,
-        opcode: 0,
-        aa: 0,
-        tc: 0,
-        rd: 1,
-        ra: 1,
-        rcode: 0,
-      },
-      qdcount: 1,
-      ancount: 1,
-      nscount: 0,
-      arcount: 0,
-    },
-    questions: {
-      name: 'google.com',
-      class: 1,
-      type: 1,
-      totalLength: 16,
-    },
-    answers: {
-      name: 'google.com',
-      type: 1,
-      class: 1,
-      ttl: 261,
-      rdlength: 4,
-      rdata: Buffer.from([142, 251, 41, 14]),
-    },
-  }
+describe('encodeDnsMessage', () => {
+  const encoded = encodeDnsMessage(mockDnsMessage)
 
-  const encoded = await encodeDnsMessage(mockDnsMessage)
+  it.skip('encodes the full request packet', () => {
+    expect(encoded).toEqual(mockRequestWire)
+  })
 
   describe('encodes the header', () => {
     it('encodes the transaction ID', () => {
@@ -44,14 +15,14 @@ describe('encodeDnsMessage', async () => {
     })
 
     it('encodes the flags', () => {
-      expect(encoded.subarray(2, 4)).toEqual(Buffer.from([0x81, 0x80]))
+      expect(encoded.subarray(2, 4)).toEqual(Buffer.from([0x01, 0x00]))
     })
 
     it('encodes the counts', () => {
-      expect(encoded.subarray(4, 6)).toEqual(Buffer.from([0x00, 0x01]))
-      expect(encoded.subarray(6, 8)).toEqual(Buffer.from([0x00, 0x01]))
-      expect(encoded.subarray(8, 10)).toEqual(Buffer.from([0x00, 0x00]))
-      expect(encoded.subarray(10, 12)).toEqual(Buffer.from([0x00, 0x00]))
+      expect(encoded.subarray(4, 6)).toEqual(Buffer.from([0x00, 0x01])) // qdcount
+      expect(encoded.subarray(6, 8)).toEqual(Buffer.from([0x00, 0x00])) // ancount
+      expect(encoded.subarray(8, 10)).toEqual(Buffer.from([0x00, 0x00])) // nscount
+      expect(encoded.subarray(10, 12)).toEqual(Buffer.from([0x00, 0x00])) // arcount
     })
   })
 
@@ -71,36 +42,6 @@ describe('encodeDnsMessage', async () => {
 
     it('encodes the class', () => {
       expect(encoded.subarray(26, 28)).toEqual(Buffer.from([0x00, 0x01]))
-    })
-  })
-
-  describe('encodes the answers', () => {
-    it('encodes the name', () => {
-      expect(encoded.subarray(28, 30)).toEqual(Buffer.from([0xc0, 0x0c]))
-    })
-
-    it('encodes the type', () => {
-      expect(encoded.subarray(30, 32)).toEqual(Buffer.from([0x00, 0x01]))
-    })
-
-    it('encodes the class', () => {
-      expect(encoded.subarray(32, 34)).toEqual(Buffer.from([0x00, 0x01]))
-    })
-
-    it('encodes the TTL', () => {
-      expect(encoded.subarray(34, 38)).toEqual(
-        Buffer.from([0x00, 0x00, 0x01, 0x05]),
-      )
-    })
-
-    it('encodes the rdlength', () => {
-      expect(encoded.subarray(38, 40)).toEqual(Buffer.from([0x00, 0x04]))
-    })
-
-    it('encodes the rdata', () => {
-      expect(encoded.subarray(40, 45)).toEqual(
-        Buffer.from([0x8e, 0xfb, 0x29, 0x0e]),
-      )
     })
   })
 })

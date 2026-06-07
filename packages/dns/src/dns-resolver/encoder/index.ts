@@ -1,4 +1,5 @@
-import type { DnsMessage, ResourceRecord } from '../interfaces.js'
+import { uint16ToBin } from '../../byte-view.js'
+import type { DnsMessageRequest, ResourceRecord } from '../interfaces.js'
 
 /**
  * Example input: 0xaaaa
@@ -9,10 +10,10 @@ const encodeTransactionId = (transactionId: string) => {
 }
 
 /**
- * Example input: { qr: 1, opcode: 0, aa: 0, tc: 0, rd: 1, ra: 1, rcode: 0 }
- * Example output: <Buffer 81 80>
+ * Example input: { qr: 0, opcode: 0, aa: 0, tc: 0, rd: 1, ra: 0, rcode: 0 }
+ * Example output: <Buffer 01 00>
  */
-const encodeFlags = (flags: DnsMessage['header']['flags']) => {
+const encodeFlags = (flags: DnsMessageRequest['header']['flags']) => {
   const result =
     (flags.qr << 15) |
     (flags.opcode << 14) |
@@ -22,14 +23,14 @@ const encodeFlags = (flags: DnsMessage['header']['flags']) => {
     (flags.ra << 7) |
     (flags.rcode << 4)
 
-  return Buffer.from(result.toString(16), 'hex')
+  return Buffer.from(result.toString(16).padStart(4, '0'), 'hex')
 }
 
 const encodeCount = (count: number) => {
   return Buffer.from((count & 0xffff).toString(16).padStart(4, '0'), 'hex')
 }
 
-const encodeHeader = (header: DnsMessage['header']) => {
+const encodeHeader = (header: DnsMessageRequest['header']) => {
   return Buffer.concat([
     encodeTransactionId(header.transactionId),
     encodeFlags(header.flags),
@@ -53,7 +54,7 @@ const encodeName = (name: string) => {
   ])
 }
 
-const encodeQuestions = (questions: DnsMessage['questions']) => {
+const encodeQuestions = (questions: DnsMessageRequest['questions']) => {
   return Buffer.concat([
     encodeName(questions.name),
     encodeCount(questions.type),
@@ -83,19 +84,23 @@ const encodeResoureRecord = (
   return Buffer.concat([name, type, clss, ttl, rdlength, resourceRecord.rdata])
 }
 
-const encodeAnswers = (
-  answers: DnsMessage['answers'],
-  headerLength: number,
-) => {
-  return encodeResoureRecord(answers, headerLength)
-}
+// const encodeAnswers = (
+//   answers: DnsMessage['answers'],
+//   headerLength: number,
+// ) => {
+//   return encodeResoureRecord(answers, headerLength)
+// }
 
-const encodeDnsMessage = async (dnsMessage: DnsMessage): Promise<Buffer> => {
+const encodeDnsMessage = (dnsMessage: DnsMessageRequest): Buffer => {
   const header = encodeHeader(dnsMessage.header)
   const questions = encodeQuestions(dnsMessage.questions)
-  const answers = encodeAnswers(dnsMessage.answers, header.length)
+  // const answers = encodeAnswers(dnsMessage.answers, header.length)
 
-  return Buffer.concat([header, questions, answers])
+  return Buffer.concat([
+    header,
+    questions,
+    // answers,
+  ])
 }
 
 export default encodeDnsMessage

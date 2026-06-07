@@ -1,15 +1,13 @@
 import { describe, expect, it } from 'vitest'
+import { mockDnsMessage, mockResponseWire } from '../fixtures/response.js'
 import decodeDnsMessage from './index.js'
 
-describe('decodeDnsMessage', async () => {
-  const mockBuffer = Buffer.from([
-    0xaa, 0xaa, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-    0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00,
-    0x00, 0x01, 0x00, 0x01, 0xc0, 0x0c, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
-    0x01, 0x05, 0x00, 0x04, 0x8e, 0xfb, 0x29, 0x0e,
-  ])
+describe('decodeDnsMessage', () => {
+  const decoded = decodeDnsMessage(mockResponseWire)
 
-  const decoded = await decodeDnsMessage(mockBuffer)
+  it('decodes the full response packet', () => {
+    expect(decoded).toEqual(mockDnsMessage)
+  })
 
   it('decodes the header', () => {
     expect(decoded.header).toStrictEqual({

@@ -1,6 +1,6 @@
 import { uint16ToDec } from '../../byte-view.js'
 import {
-  type DnsMessage,
+  type DnsMessageResponse,
   HEADER_LENGTH,
   type ResourceRecord,
 } from '../interfaces.js'
@@ -120,8 +120,15 @@ const decodeResourceRecord = (
   }
 }
 
-const decodeDnsMessage = async (buffer: Buffer): Promise<DnsMessage> => {
+const decodeDnsMessage = (buffer: Buffer): DnsMessageResponse => {
   const questions = decodeQuestions(buffer.subarray(HEADER_LENGTH))
+
+  const result = {
+    header: decodeHeader(buffer),
+  }
+
+  // On an invalid response, only the header is returned so only parse that
+  if (buffer.length === HEADER_LENGTH) return result
 
   return {
     header: decodeHeader(buffer),
