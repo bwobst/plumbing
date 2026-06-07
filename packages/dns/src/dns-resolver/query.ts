@@ -1,8 +1,9 @@
 import dgram from 'node:dgram'
-import decodeDnsMessage from './decoder/index.js'
-import encodeDnsMessage from './encoder/index.js'
-import { mockDnsMessage } from './fixtures/request.js'
+import decodeDnsMessage from './decoder.js'
+import encodeDnsMessage from './encoder.js'
+import { mockDnsMessage } from './fixtures/request.recursion.js'
 
+const ROOT_NAME_SERVER_IP = '170.247.170.2' // b.root-servers.net, operated by University of Southern California, Information Sciences Institute
 const ADDRESS = '8.8.8.8'
 const PORT = 53
 
@@ -28,7 +29,7 @@ socket.on('message', (msg, rinfo) => {
 
 const sendMessage = (message: Buffer) => {
   console.log('Sending message', message)
-  socket.send(message, PORT, ADDRESS)
+  socket.send(message, PORT, ROOT_NAME_SERVER_IP)
 }
 
 const message = encodeDnsMessage(mockDnsMessage)

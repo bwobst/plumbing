@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { mockDnsMessage, mockRequestWire } from '../fixtures/request.js'
-import encodeDnsMessage from './index.js'
+import encodeDnsMessage from './encoder.js'
+import {
+  mockDnsMessage,
+  mockRequestWire,
+} from './fixtures/request.recursion.js'
 
 describe('encodeDnsMessage', () => {
   const encoded = encodeDnsMessage(mockDnsMessage)

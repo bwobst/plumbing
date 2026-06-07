@@ -1,9 +1,9 @@
-import { uint16ToDec } from '../../byte-view.js'
+import { uint16ToDec } from '../byte-view.js'
 import {
   type DnsMessageResponse,
   HEADER_LENGTH,
   type ResourceRecord,
-} from '../interfaces.js'
+} from './interfaces.js'
 
 /**
  * Terminology:
