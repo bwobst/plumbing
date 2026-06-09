@@ -1,10 +1,9 @@
-import type { DnsMessageRequest } from '../interfaces.js'
+import type { DnsMessageRequest } from '../../../interfaces.js'
 
 /**
- * Query that elicits `mockDnsMessage` in response.ts — same transaction ID and
- * question section; header flags/counts differ (qr=0, no answer sections).
+ * google.com, type A (1), RD=1 — sent to a public resolver (e.g. 8.8.8.8).
  */
-export const mockDnsMessage: DnsMessageRequest = {
+export const query: DnsMessageRequest = {
   header: {
     transactionId: '0xaaaa',
     flags: {
@@ -29,8 +28,8 @@ export const mockDnsMessage: DnsMessageRequest = {
   },
 }
 
-/** Header + question only (28 bytes). Matches response.ts through byte 27. */
-export const mockRequestWire = Buffer.from([
+/** Header + question only (28 bytes). RD=1 (flags 0x0100). */
+export const queryWire = Buffer.from([
   0xaa, 0xaa, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06,
   0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,
   0x00, 0x01,

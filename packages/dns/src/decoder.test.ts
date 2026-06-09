@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import decodeDnsMessage from './decoder.js'
 import {
-  mockDnsMessage,
-  mockResponseWire,
-} from './fixtures/response.recursion.js'
+  decoded as expected,
+  wire,
+} from './fixtures/recursive/google-com-a/01-answer.js'
 
 describe('decodeDnsMessage', () => {
-  const decoded = decodeDnsMessage(mockResponseWire)
+  const decoded = decodeDnsMessage(wire)
 
   it('decodes the full response packet', () => {
-    expect(decoded).toEqual(mockDnsMessage)
+    expect(decoded).toEqual(expected)
   })
 
   it('decodes the header', () => {

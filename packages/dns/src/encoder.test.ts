@@ -1,15 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import encodeDnsMessage from './encoder.js'
-import {
-  mockDnsMessage,
-  mockRequestWire,
-} from './fixtures/request.recursion.js'
+import { query, queryWire } from './fixtures/recursive/google-com-a/00-query.js'
 
 describe('encodeDnsMessage', () => {
-  const encoded = encodeDnsMessage(mockDnsMessage)
+  const encoded = encodeDnsMessage(query)
 
   it.skip('encodes the full request packet', () => {
-    expect(encoded).toEqual(mockRequestWire)
+    expect(encoded).toEqual(queryWire)
   })
 
   describe('encodes the header', () => {

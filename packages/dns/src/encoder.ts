@@ -1,4 +1,4 @@
-import { uint16ToBin } from '../byte-view.js'
+import { uint16ToBin } from './byte-view.js'
 import type { DnsMessageRequest, ResourceRecord } from './interfaces.js'
 
 /**
