@@ -1,4 +1,4 @@
-import type { DnsMessageResponse } from '../../../interfaces.js'
+import type { DnsMessageResponse } from '@dns/interfaces.js'
 
 /**
  * Hop 1 response: root → TLD referral.

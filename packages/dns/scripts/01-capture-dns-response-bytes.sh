@@ -6,7 +6,7 @@ usage() {
 Capture raw DNS response bytes to a .bin fixture file.
 
 Usage:
-  capture-dns-response-bytes.sh -o OUTPUT.bin [-s SERVER] [--rd | --no-rd] [--query-hex HEX]
+  01-capture-dns-response-bytes.sh -o OUTPUT.bin [-s SERVER] [--rd | --no-rd] [--query-hex HEX]
 
 Options:
   -o, --output PATH   Output .bin file path (required)
@@ -18,11 +18,11 @@ Options:
 
 Examples:
   # Recursive resolver answer
-  capture-dns-response-bytes.sh \
+  01-capture-dns-response-bytes.sh \
     -o src/fixtures/recursive/google-com-a/01-answer.bin
 
   # Iterative hop 1 — root referral
-  capture-dns-response-bytes.sh \
+  01-capture-dns-response-bytes.sh \
     -s 170.247.170.2 \
     --no-rd \
     -o src/fixtures/iterative/google-com-a/01-root-referral.bin

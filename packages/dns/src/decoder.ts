@@ -110,13 +110,15 @@ const decodeResourceRecord = (
     fullBuffer.subarray(namePointerOffset),
   )
 
+  const rdlength = parseIntFromBuff(buffer.subarray(10, 12))
+
   return {
     name: decodedQuestionByOffset.name,
     type: parseIntFromBuff(buffer.subarray(2, 4)),
     class: parseIntFromBuff(buffer.subarray(4, 6)),
     ttl: parseIntFromBuff(buffer.subarray(6, 10)),
-    rdlength: parseIntFromBuff(buffer.subarray(10, 12)),
-    rdata: buffer.subarray(12),
+    rdlength,
+    rdata: buffer.subarray(12, 12 + rdlength),
   }
 }
 

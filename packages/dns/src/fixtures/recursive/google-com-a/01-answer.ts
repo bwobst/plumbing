@@ -1,4 +1,4 @@
-import type { DnsMessageResponse } from '../../../interfaces.js'
+import type { DnsMessageResponse } from '@dns/interfaces.js'
 
 /**
  * Response to 00-query from 8.8.8.8.

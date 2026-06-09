@@ -1,4 +1,4 @@
-import type { DnsMessageRequest } from '../../../interfaces.js'
+import type { DnsMessageRequest } from '@dns/interfaces.js'
 
 /**
  * google.com, type A (1), RD=1 — sent to a public resolver (e.g. 8.8.8.8).

@@ -6,7 +6,7 @@ usage() {
 Wrap raw DNS response bytes in a UDP/IP/Ethernet frame for Wireshark.
 
 Usage:
-  bin-to-pcap.sh -i INPUT.bin -o OUTPUT.pcap [options]
+  03-bin-to-pcap.sh -i INPUT.bin -o OUTPUT.pcap [options]
 
 Options:
   -i, --input PATH    Input .bin file (required)
@@ -16,7 +16,7 @@ Options:
   -h, --help          Show this help
 
 Example:
-  bin-to-pcap.sh \
+  03-bin-to-pcap.sh \
     -i src/fixtures/iterative/google-com-a/01-root-referral.bin \
     -o src/fixtures/iterative/google-com-a/01-root-referral.pcap \
     -4 10.0.0.1,170.247.170.2
