@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import decodeDnsMessage from './decoder.js'
 import {
-  decoded as recursiveExpected,
-  wire as recursiveWire,
-} from './fixtures/recursive/google-com-a/01-answer.js'
-import {
   decoded as comReferralExpected,
   wire as comReferralWire,
 } from './fixtures/iterative/google-com-a/02-com-referral.js'
@@ -12,6 +8,10 @@ import {
   decoded as authoritativeExpected,
   wire as authoritativeWire,
 } from './fixtures/iterative/google-com-a/03-authoritative-answer.js'
+import {
+  decoded as recursiveExpected,
+  wire as recursiveWire,
+} from './fixtures/recursive/google-com-a/01-answer.js'
 
 describe('decodeDnsMessage', () => {
   describe('recursive/google-com-a/01-answer', () => {
